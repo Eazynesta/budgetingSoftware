@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
+const incomeRoutes = require('./routes/incomeRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
+const loanRoutes = require('./routes/loanRoutes');
 
 dotenv.config();
 
@@ -13,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection with Debug Logs
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -23,17 +26,11 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error('❌ MongoDB Connection Error:', err);
 });
 
-// Debug MongoDB connection events
-mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB Connection Error:', err);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️ MongoDB Disconnected');
-});
-
 // Routes
 app.use('/auth', authRoutes);
+app.use('/income', incomeRoutes);
+app.use('/expense', expenseRoutes);
+app.use('/loan', loanRoutes);
 
 app.get('/', (req, res) => {
   res.send('Budgeting App Backend');
