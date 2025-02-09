@@ -1,56 +1,45 @@
-// backend/controllers/authController.js
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
 
-dotenv.config();
-
-// Signup
+// Signup function
 exports.signup = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { name, email, password } = req.body;
 
-    // Check if the user already exists
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists' });
+    // Check if user already exists
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // Create a new user
-    const user = new User({ username, password });
+    // Create new user
+    user = new User({ name, email, password });
     await user.save();
 
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(201).json({ token });
+    res.status(201).json({ message: "User registered successfully", user });
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error: error.message });
+    res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
 
-// Login
+// Login function
 exports.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // Find the user
-    const user = await User.findOne({ username });
+    // Find user by email
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid username or password' });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // Compare passwords
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid username or password' });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(200).json({ token });
+    res.json({ message: "Login successful", user });
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong', error: error.message });
+    res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
