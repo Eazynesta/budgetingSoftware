@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Signup function
@@ -15,7 +16,10 @@ exports.signup = async (req, res) => {
     user = new User({ name, email, password });
     await user.save();
 
-    res.status(201).json({ message: "User registered successfully", user });
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error: error.message });
   }
@@ -38,7 +42,10 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    res.json({ message: "Login successful", user });
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ message: "Login successful", token });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error: error.message });
   }
